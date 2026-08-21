@@ -1,5 +1,7 @@
 #include <iostream>
-#include <chrono>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 #include "Order.h"
 #include "OrderBook.h"
@@ -8,64 +10,96 @@ int main() {
 
     OrderBook book;
 
-    const int NUM_ORDERS = 100000;
+    std::ifstream file("data/orders.txt");
 
-    auto start =
-        std::chrono::high_resolution_clock::now();
+    if (!file) {
+        std::cerr << "Unable to open orders.txt\n";
+        return 1;
+    }
 
-    for (int i = 0; i < NUM_ORDERS; i++) {
+    std::string line;
 
-        if (i % 2 == 0) {
+    std::cout << "===== PROCESSING ORDERS =====\n\n";
+
+    while (std::getline(file, line)) {
+
+        if (line.empty()) {
+            continue;
+        }
+
+        std::stringstream ss(line);
+
+        std::string command;
+        ss >> command;
+
+        if (command == "ADD") {
+
+            uint64_t id;
+            std::string side;
+            std::string type;
+            double price;
+            uint64_t quantity;
+
+            ss >> id >> side >> type >> price >> quantity;
+
+            OrderSide orderSide =
+                (side == "BUY")
+                ? OrderSide::BUY
+                : OrderSide::SELL;
+
+            OrderType orderType =
+                (type == "LIMIT")
+                ? OrderType::LIMIT
+                : OrderType::MARKET;
+
+            std::cout
+                << "Adding "
+                << side
+                << " Order " << id
+                << " | Price: " << price
+                << " | Quantity: " << quantity
+                << "\n";
 
             book.addOrder(
                 Order(
-                    i,
-                    OrderSide::BUY,
-                    OrderType::LIMIT,
-                    100,
-                    10
+                    id,
+                    orderSide,
+                    orderType,
+                    price,
+                    quantity
                 )
             );
         }
-        else {
 
-            book.addOrder(
-                Order(
-                    i,
-                    OrderSide::SELL,
-                    OrderType::LIMIT,
-                    100,
-                    10
-                )
-            );
+        else if (command == "CANCEL") {
+
+            uint64_t id;
+
+            ss >> id;
+
+            bool cancelled = book.cancelOrder(id);
+
+            std::cout
+                << "Cancelling Order "
+                << id
+                << " -> "
+                << (cancelled ? "SUCCESS" : "FAILED")
+                << "\n";
         }
     }
 
-    auto end =
-        std::chrono::high_resolution_clock::now();
+    file.close();
 
-    auto duration =
-        std::chrono::duration_cast<
-            std::chrono::milliseconds
-        >(end - start);
+    std::cout << "\n";
+    book.printTrades();
 
-    double seconds =
-        duration.count() / 1000.0;
+    std::cout << "\n";
+    book.printBook();
 
-    std::cout
-        << "Orders Processed: "
-        << NUM_ORDERS
-        << "\n";
+    book.saveTradesToFile("data/trades.txt");
 
     std::cout
-        << "Execution Time: "
-        << seconds
-        << " sec\n";
-
-    std::cout
-        << "Throughput: "
-        << (NUM_ORDERS / seconds)
-        << " orders/sec\n";
+        << "\nTrade log saved to data/trades.txt\n";
 
     return 0;
 }

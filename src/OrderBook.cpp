@@ -1,5 +1,6 @@
 #include "OrderBook.h"
 #include <iostream>
+#include <fstream>
 
 void OrderBook::addOrder(const Order& order) {
 
@@ -207,4 +208,26 @@ void OrderBook::printTrades() const {
                   << " | Quantity: " << trade.quantity
                   << "\n";
     }
+}
+
+void OrderBook::saveTradesToFile(const std::string& filename) const {
+
+    std::ofstream file(filename);
+
+    if (!file) {
+        std::cerr << "Unable to open trade log file.\n";
+        return;
+    }
+
+    file << "BUY_ORDER_ID,SELL_ORDER_ID,PRICE,QUANTITY\n";
+
+    for (const auto& trade : trades) {
+
+        file << trade.buyOrderId << ","
+             << trade.sellOrderId << ","
+             << trade.price << ","
+             << trade.quantity << "\n";
+    }
+
+    file.close();
 }

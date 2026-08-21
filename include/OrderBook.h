@@ -6,6 +6,7 @@
 #include <map>
 #include <deque>
 #include <vector>
+#include <string>
 
 class OrderBook {
 private:
@@ -31,4 +32,6 @@ public:
     void printBook() const;
 
     void printTrades() const;
+
+    void saveTradesToFile(const std::string& filename) const;
 };
