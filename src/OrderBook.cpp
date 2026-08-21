@@ -116,6 +116,53 @@ void OrderBook::matchSellOrder(Order order) {
 // PRINT ORDER BOOK
 // --------------------------------------------------
 
+bool OrderBook::cancelOrder(uint64_t orderId) {
+
+    // Search BUY orders
+    for (auto& entry : buyOrders) {
+
+        auto& orders = entry.second;
+
+        for (auto it = orders.begin(); it != orders.end(); ++it) {
+
+            if (it->id == orderId) {
+
+                orders.erase(it);
+
+                if (orders.empty()) {
+                    buyOrders.erase(entry.first);
+                }
+
+                return true;
+            }
+        }
+    }
+
+    // Search SELL orders
+    for (auto& entry : sellOrders) {
+
+        auto& orders = entry.second;
+
+        for (auto it = orders.begin(); it != orders.end(); ++it) {
+
+            if (it->id == orderId) {
+
+                orders.erase(it);
+
+                if (orders.empty()) {
+                    sellOrders.erase(entry.first);
+                }
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+
 void OrderBook::printBook() const {
 
     std::cout << "\n===== SELL ORDERS =====\n";

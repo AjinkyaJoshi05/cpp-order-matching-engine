@@ -26,6 +26,8 @@ public:
 
     void addOrder(const Order& order);
 
+    bool cancelOrder(uint64_t orderId);
+
     void printBook() const;
 
     void printTrades() const;
