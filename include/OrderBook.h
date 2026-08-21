@@ -23,6 +23,9 @@ private:
 
     void matchSellOrder(Order order);
 
+    void matchMarketBuy(Order order);   
+    void matchMarketSell(Order order);
+
 public:
 
     void addOrder(const Order& order);

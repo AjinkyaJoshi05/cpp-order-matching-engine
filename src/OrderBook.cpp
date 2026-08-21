@@ -4,6 +4,18 @@
 
 void OrderBook::addOrder(const Order& order) {
 
+    if (order.type == OrderType::MARKET) {
+
+        if (order.side == OrderSide::BUY) {
+            matchMarketBuy(order);
+        }
+        else {
+            matchMarketSell(order);
+        }
+
+        return;
+    }
+
     if (order.side == OrderSide::BUY) {
         matchBuyOrder(order);
     }
@@ -109,6 +121,76 @@ void OrderBook::matchSellOrder(Order order) {
     // Remaining quantity goes into order book
     if (order.quantity > 0) {
         sellOrders[order.price].push_back(order);
+    }
+}
+
+void OrderBook::matchMarketBuy(Order order) {
+
+    while (order.quantity > 0 &&
+           !sellOrders.empty()) {
+
+        auto bestSell = sellOrders.begin();
+
+        double sellPrice = bestSell->first;
+
+        auto& sellQueue = bestSell->second;
+        Order& sellOrder = sellQueue.front();
+
+        uint64_t tradedQuantity =
+            std::min(order.quantity, sellOrder.quantity);
+
+        trades.emplace_back(
+            order.id,
+            sellOrder.id,
+            sellPrice,
+            tradedQuantity
+        );
+
+        order.quantity -= tradedQuantity;
+        sellOrder.quantity -= tradedQuantity;
+
+        if (sellOrder.quantity == 0) {
+            sellQueue.pop_front();
+        }
+
+        if (sellQueue.empty()) {
+            sellOrders.erase(bestSell);
+        }
+    }
+}
+
+void OrderBook::matchMarketSell(Order order) {
+
+    while (order.quantity > 0 &&
+           !buyOrders.empty()) {
+
+        auto bestBuy = buyOrders.begin();
+
+        double buyPrice = bestBuy->first;
+
+        auto& buyQueue = bestBuy->second;
+        Order& buyOrder = buyQueue.front();
+
+        uint64_t tradedQuantity =
+            std::min(order.quantity, buyOrder.quantity);
+
+        trades.emplace_back(
+            buyOrder.id,
+            order.id,
+            buyPrice,
+            tradedQuantity
+        );
+
+        order.quantity -= tradedQuantity;
+        buyOrder.quantity -= tradedQuantity;
+
+        if (buyOrder.quantity == 0) {
+            buyQueue.pop_front();
+        }
+
+        if (buyQueue.empty()) {
+            buyOrders.erase(bestBuy);
+        }
     }
 }
 
