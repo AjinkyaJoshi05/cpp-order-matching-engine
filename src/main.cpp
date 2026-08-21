@@ -5,8 +5,24 @@
 
 #include "Order.h"
 #include "OrderBook.h"
+#include "Benchmark.h"
 
-int main() {
+int main(int argc, char* argv[]) {
+     // -----------------------------------------
+    // BENCHMARK MODE
+    // -----------------------------------------
+
+    if (argc > 1 &&
+        std::string(argv[1]) == "--benchmark") {
+
+        runBenchmark();
+        return 0;
+    }
+
+
+    // -----------------------------------------
+    // NORMAL TRADING MODE
+    // -----------------------------------------
 
     OrderBook book;
 
