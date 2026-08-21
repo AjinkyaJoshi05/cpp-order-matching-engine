@@ -313,3 +313,7 @@ void OrderBook::saveTradesToFile(const std::string& filename) const {
 
     file.close();
 }
+
+const std::vector<Trade>& OrderBook::getTrades() const {
+    return trades;
+}

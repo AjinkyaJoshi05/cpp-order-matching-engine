@@ -37,4 +37,6 @@ public:
     void printTrades() const;
 
     void saveTradesToFile(const std::string& filename) const;
+    
+    const std::vector<Trade>& getTrades() const;
 };
