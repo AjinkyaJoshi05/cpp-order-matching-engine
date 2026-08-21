@@ -1,4 +1,5 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <chrono>
 
 #include "Order.h"
 #include "OrderBook.h"
@@ -7,29 +8,64 @@ int main() {
 
     OrderBook book;
 
-    book.addOrder(
-        Order(1, OrderSide::BUY, OrderType::LIMIT, 100.0, 50)
-    );
+    const int NUM_ORDERS = 100000;
 
-    book.addOrder(
-        Order(2, OrderSide::BUY, OrderType::LIMIT, 102.0, 30)
-    );
+    auto start =
+        std::chrono::high_resolution_clock::now();
 
-    book.addOrder(
-        Order(3, OrderSide::SELL, OrderType::LIMIT, 105.0, 40)
-    );
+    for (int i = 0; i < NUM_ORDERS; i++) {
 
-    std::cout << "\nBEFORE CANCELLATION";
-    book.printBook();
+        if (i % 2 == 0) {
 
-    bool cancelled = book.cancelOrder(2);
+            book.addOrder(
+                Order(
+                    i,
+                    OrderSide::BUY,
+                    OrderType::LIMIT,
+                    100,
+                    10
+                )
+            );
+        }
+        else {
 
-    std::cout << "\nCancellation result: "
-              << (cancelled ? "SUCCESS" : "FAILED")
-              << "\n";
+            book.addOrder(
+                Order(
+                    i,
+                    OrderSide::SELL,
+                    OrderType::LIMIT,
+                    100,
+                    10
+                )
+            );
+        }
+    }
 
-    std::cout << "\nAFTER CANCELLATION";
-    book.printBook();
+    auto end =
+        std::chrono::high_resolution_clock::now();
+
+    auto duration =
+        std::chrono::duration_cast<
+            std::chrono::milliseconds
+        >(end - start);
+
+    double seconds =
+        duration.count() / 1000.0;
+
+    std::cout
+        << "Orders Processed: "
+        << NUM_ORDERS
+        << "\n";
+
+    std::cout
+        << "Execution Time: "
+        << seconds
+        << " sec\n";
+
+    std::cout
+        << "Throughput: "
+        << (NUM_ORDERS / seconds)
+        << " orders/sec\n";
 
     return 0;
 }
